@@ -8,3 +8,5 @@ services:
       - 'MYSQL_USER=Pierrot'
     ports:
       - '3308:3306'
+    volumes:
+      - './mysql-files:/var/lib/mysql'
