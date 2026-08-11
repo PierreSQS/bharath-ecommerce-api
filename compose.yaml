@@ -2,7 +2,7 @@ services:
   mysql:
     image: 'mysql:latest'
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
+      - 'MYSQL_DATABASE=ecommerce_db'
       - 'MYSQL_PASSWORD=Pierrot'
       - 'MYSQL_ROOT_PASSWORD=Galerien3?'
       - 'MYSQL_USER=Pierrot'
