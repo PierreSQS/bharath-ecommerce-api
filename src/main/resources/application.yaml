@@ -12,3 +12,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+  docker:
+    compose:
+      skip:
+        in-tests: false
+
