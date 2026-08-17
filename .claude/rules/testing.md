@@ -1,7 +1,7 @@
 # Testing Rules
 - Test class naming: `[ClassName]Test.java`.
 - Use `@ExtendWith(MockitoExtension.class)` for unit tests.
-- Use `@WebMvcTest` for controller tests; mock all dependencies with `@MockBean`.
+- Use `@WebMvcTest` for controller tests; mock all dependencies with `@MockitoBean`.
 - Follow the AAA pattern, commenting each section:
   ```
   // Arrange
