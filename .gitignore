@@ -1,20 +1,36 @@
-HELP.md
+### Java / Spring Boot ###
+*.class
 target/
-.mvn/wrapper/maven-wrapper.jar
+build/
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+hs_err_pid*
+replay_pid*
+spring-shell.log
 
-### STS ###
+### Maven ###
+.flattened-pom.xml
+dependency-reduced-pom.xml
+pom.xml.next
+pom.xml.releaseBackup
+pom.xml.tag
+pom.xml.versionsBackup
+release.properties
+.mvn/timing.properties
+
+### Spring Tool Suite / Eclipse ###
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
-.sts4-cache
+.sts4-cache/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -25,15 +41,60 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 
-### MySQL data volume ###
-mysql-files/
+### Claude Code ###
+.claude/settings.local.json
+.claude/worktrees/
 
-### Local environment ###
+### MySQL local data and runtime files ###
+/mysql-files/
+/mysql-data/
+/mysql-backups/
+*.pid
+*.sock
+*.sock.lock
+*.sql.gz
+*.sql.bz2
+
+### Environment and local application configuration ###
 .env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+application-local.properties
+application-local.yaml
+application-local.yml
+application-*.local.properties
+application-*.local.yaml
+application-*.local.yml
+
+### Logs, reports, and temporary files ###
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+logs/
+tmp/
+coverage/
+
+### Operating system files ###
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+ehthumbs.db
