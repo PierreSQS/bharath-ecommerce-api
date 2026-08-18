@@ -1,7 +1,7 @@
 # ecommerce-api
 
 ## Stack
-- Java 21
+- Java 25
 - Spring Boot 4.1.0
 - Maven
 - MySQL
@@ -12,7 +12,7 @@
 - Use the [Spring Framework Testing Documentation](https://docs.spring.io/spring-framework/reference/testing.html) as the primary reference for testing.
 
 ## Package Structure
-Base package: `com.example.ecommerce`
+Base package: `com.bharath.ecommerce.api`
 
 Sub-packages:
 - `controller`
