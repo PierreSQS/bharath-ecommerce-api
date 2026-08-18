@@ -1,4 +1,4 @@
-package com.bharat.ecommerce.api.ecommerceapi;
+package com.bharath.ecommerce.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -8,7 +8,7 @@
         <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.bharat.ecommerce.api</groupId>
+    <groupId>com.bharath.ecommerce.api</groupId>
     <artifactId>ecommerce-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ecommerce-api</name>
