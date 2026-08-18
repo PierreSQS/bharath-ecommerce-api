@@ -3,8 +3,9 @@
 ## Stack
 - Java 25
 - Spring Boot 4.1.0
-- Maven
-- MySQL
+- Maven 3.9.16 (Maven Wrapper)
+- MySQL 9.5 (Docker Compose)
+- Spring MVC, Spring Data JPA, Bean Validation, Actuator, Flyway, and Lombok
 
 ## Official Spring Documentation
 - For every implementation or code change, consult and follow the official Spring documentation, especially its recommended practices, APIs, configuration, and testing guidance.
@@ -46,9 +47,17 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 
 ## Database
 - MySQL, database `ecommerce_db`.
-- `ddl-auto=validate` — tables come from `schema.sql`, not Hibernate.
+- Flyway owns the runtime schema: `V1__init_schema.sql` creates the `categories`, `products`, `customers`, `orders`, `order_items`, and `payments` tables and their indexes; `V2__populate_db.sql` seeds categories, products, and customers.
+- `spring.jpa.hibernate.ddl-auto=validate` — Hibernate validates entity mappings and does not create or update tables.
+- `src/main/resources/db-scripts/schema.sql` is a standalone reset/setup script; it is not in Flyway's configured `classpath:db/migration` location.
+- Open EntityManager in View is disabled. Hibernate SQL formatting, display, and highlighting are enabled.
+- Docker Compose runs `mysql:9.5`, publishes container port `3306` on `${MYSQL_PORT:-3308}`, and persists data in `./mysql-files`.
+- Compose expects `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_ROOT_PASSWORD`; local values are supplied through the gitignored `.env` file.
+- Spring Boot Docker Compose integration is enabled during tests (`spring.docker.compose.skip.in-tests=false`).
 
 ## Commands
-- Run: `./mvnw spring-boot:run`
-- Test: `./mvnw test`
-- Compile check: `./mvnw clean compile`
+- Run: `./mvnw spring-boot:run` (Windows: `.\mvnw.cmd spring-boot:run`)
+- Test: `./mvnw test` (Windows: `.\mvnw.cmd test`)
+- Compile check: `./mvnw clean compile` (Windows: `.\mvnw.cmd clean compile`)
+- Start/stop MySQL directly: `docker compose up -d` / `docker compose down`
+- The current test suite contains one `@SpringBootTest` application-context smoke test.
