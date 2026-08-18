@@ -85,24 +85,6 @@ public class OrderService {
                 .toList();
     }
 
-    /** Returns the complete product catalogue with category data mapped inside the transaction. */
-    @Transactional(readOnly = true)
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(product -> ProductResponse.builder()
-                        .id(product.getId())
-                        .name(product.getName())
-                        .description(product.getDescription())
-                        .price(product.getPrice())
-                        .sku(product.getSku())
-                        .stockQuantity(product.getStockQuantity())
-                        .active(product.getActive())
-                        .categoryId(product.getCategory().getId())
-                        .categoryName(product.getCategory().getName())
-                        .build())
-                .toList();
-    }
-
     /** Applies only explicit workflow edges; skipped, repeated, and backward changes are conflicts. */
     @Transactional
     public OrderResponse updateStatus(Long id, OrderStatus requestedStatus) {
@@ -138,7 +120,7 @@ public class OrderService {
         for (OrderItemRequest item : items) {
             try {
                 quantities.merge(item.getProductId(), item.getQuantity(), Math::addExact);
-            } catch (ArithmeticException exception) {
+            } catch (ArithmeticException _) {
                 throw new BusinessRuleException("Requested quantity is too large for product " + item.getProductId());
             }
         }
