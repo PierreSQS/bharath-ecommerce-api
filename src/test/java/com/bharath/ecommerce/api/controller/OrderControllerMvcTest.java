@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,7 +70,8 @@ class OrderControllerMvcTest {
         result.andExpect(status().isCreated())
                 .andExpect(header().string("Location", "http://localhost/api/v1/orders/21"))
                 .andExpect(jsonPath("$.id").value(21))
-                .andExpect(jsonPath("$.status").value("PENDING"));
+                .andExpect(jsonPath("$.status").value("PENDING"))
+                .andDo(print());
     }
 
     @Test
@@ -123,7 +125,9 @@ class OrderControllerMvcTest {
                 .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
-        result.andExpect(status().isOk()).andExpect(jsonPath("$.status").value("CONFIRMED"));
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CONFIRMED"))
+                .andDo(print());
     }
 
     @Test
@@ -137,7 +141,7 @@ class OrderControllerMvcTest {
                 .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
-        result.andExpect(status().isBadRequest());
+        result.andExpect(status().isBadRequest()).andDo(print());
     }
 
     @Test

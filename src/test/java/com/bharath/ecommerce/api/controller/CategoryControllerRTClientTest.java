@@ -10,6 +10,8 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 @WebMvcTest(CategoryController.class)
@@ -17,6 +19,17 @@ import static org.mockito.Mockito.when;
 class CategoryControllerRTClientTest {
     @Autowired private RestTestClient restTestClient;
     @MockitoBean private CategoryService categoryService;
+
+    @Test
+    void should_getAllCategories() {
+        when(categoryService.getAll()).thenReturn(List.of(CategoryResponse.builder().id(7L)
+                .name("Audio").slug("audio").description("Audio gear").build()));
+
+        restTestClient.get().uri("/api/v1/categories").exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$[0].id").isEqualTo(7)
+                .jsonPath("$[0].slug").isEqualTo("audio");
+    }
 
     @Test
     void should_createCategory_when_requestIsValid() {

@@ -10,6 +10,8 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 @WebMvcTest(CustomerController.class)
@@ -17,6 +19,17 @@ import static org.mockito.Mockito.when;
 class CustomerControllerRTClientTest {
     @Autowired private RestTestClient restTestClient;
     @MockitoBean private CustomerService customerService;
+
+    @Test
+    void should_getAllCustomers() {
+        when(customerService.getAll()).thenReturn(List.of(CustomerResponse.builder().id(3L)
+                .firstName("Ada").lastName("Lovelace").email("ada@example.com").build()));
+
+        restTestClient.get().uri("/api/v1/customers").exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$[0].id").isEqualTo(3)
+                .jsonPath("$[0].email").isEqualTo("ada@example.com");
+    }
 
     @Test
     void should_registerCustomer_when_requestIsValid() {

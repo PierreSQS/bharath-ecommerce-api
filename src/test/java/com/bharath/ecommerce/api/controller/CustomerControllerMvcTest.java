@@ -11,8 +11,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,6 +26,17 @@ class CustomerControllerMvcTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private JsonMapper jsonMapper;
     @MockitoBean private CustomerService customerService;
+
+    @Test
+    void should_getAllCustomers() throws Exception {
+        when(customerService.getAll()).thenReturn(List.of(CustomerResponse.builder().id(3L)
+                .firstName("Ada").lastName("Lovelace").email("ada@example.com").build()));
+
+        mockMvc.perform(get("/api/v1/customers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(3))
+                .andExpect(jsonPath("$[0].email").value("ada@example.com"));
+    }
 
     @Test
     void should_registerCustomer_when_requestIsValid() throws Exception {

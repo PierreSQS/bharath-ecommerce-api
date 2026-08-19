@@ -11,9 +11,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,6 +29,17 @@ class CategoryControllerMvcTest {
     @MockitoBean private CategoryService categoryService;
 
     @Test
+    void should_getAllCategories() throws Exception {
+        when(categoryService.getAll()).thenReturn(List.of(CategoryResponse.builder().id(7L)
+                .name("Audio").slug("audio").description("Audio gear").build()));
+
+        mockMvc.perform(get("/api/v1/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(7))
+                .andExpect(jsonPath("$[0].slug").value("audio"));
+    }
+
+    @Test
     void should_createCategory_when_requestIsValid() throws Exception {
         // Arrange
         var request = CreateCategoryRequest.builder().name("Audio").slug("audio").description("Audio gear").build();
@@ -34,7 +49,8 @@ class CategoryControllerMvcTest {
         // Act
         var result = mockMvc.perform(post("/api/v1/categories")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)))
+                .andDo(print());
 
         // Assert
         result.andExpect(status().isCreated())
