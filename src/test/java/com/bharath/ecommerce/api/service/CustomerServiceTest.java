@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +25,19 @@ class CustomerServiceTest {
 
     @Autowired
     private CustomerService service;
+
+    @Test
+    void getsAllCustomersAsResponses() {
+        when(customerRepository.findAll()).thenReturn(List.of(Customer.builder().id(1L)
+                .firstName("Ada").lastName("Lovelace").email("ada@example.com").build()));
+
+        var responses = service.getAll();
+
+        assertThat(responses).singleElement().satisfies(response -> {
+            assertThat(response.getId()).isEqualTo(1L);
+            assertThat(response.getEmail()).isEqualTo("ada@example.com");
+        });
+    }
 
     @Test
     void registersCustomerWithCanonicalEmail() {

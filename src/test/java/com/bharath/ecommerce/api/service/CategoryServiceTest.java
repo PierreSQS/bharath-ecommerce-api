@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +26,19 @@ class CategoryServiceTest {
 
     @Autowired
     private CategoryService service;
+
+    @Test
+    void getsAllCategoriesAsResponses() {
+        when(categoryRepository.findAll()).thenReturn(List.of(Category.builder().id(7L)
+                .name("Audio").slug("audio").description("Audio gear").build()));
+
+        var responses = service.getAll();
+
+        assertThat(responses).singleElement().satisfies(response -> {
+            assertThat(response.getId()).isEqualTo(7L);
+            assertThat(response.getSlug()).isEqualTo("audio");
+        });
+    }
 
     @Test
     void createsCategoryAfterNormalizingText() {
