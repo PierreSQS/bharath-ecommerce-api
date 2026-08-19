@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -31,6 +32,11 @@ public class CustomerService {
                 .address(trimToNull(request.getAddress()))
                 .build();
         return toResponse(customerRepository.save(customer));
+    }
+
+    @Transactional(readOnly = true)
+    public List<CustomerResponse> getAll() {
+        return customerRepository.findAll().stream().map(this::toResponse).toList();
     }
 
     private CustomerResponse toResponse(Customer customer) {
