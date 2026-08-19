@@ -15,9 +15,9 @@ import com.bharath.ecommerce.api.repository.CustomerRepository;
 import com.bharath.ecommerce.api.repository.OrderRepository;
 import com.bharath.ecommerce.api.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,20 +29,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringJUnitConfig(OrderService.class)
 class OrderServiceTest {
-    @Mock
+    @MockitoBean
     private OrderRepository orderRepository;
-    @Mock
+    @MockitoBean
     private ProductRepository productRepository;
-    @Mock
+    @MockitoBean
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private OrderService service;
 
     @Test
     void placeOrderRejectsUnknownCustomer() {
         when(customerRepository.findById(42L)).thenReturn(Optional.empty());
-        OrderService service = service();
-
         assertThatThrownBy(() -> service.placeOrder(orderRequest(42L, 10L, 2)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Customer not found with id 42");
@@ -57,8 +58,6 @@ class OrderServiceTest {
                 .price(new BigDecimal("20.00")).build();
         when(customerRepository.findById(42L)).thenReturn(Optional.of(customer));
         when(productRepository.findAllByIdForUpdate(any())).thenReturn(List.of(product));
-        OrderService service = service();
-
         assertThatThrownBy(() -> service.placeOrder(orderRequest(42L, 10L, 2)))
                 .isInstanceOf(InsufficientStockException.class)
                 .hasMessage("Insufficient stock for product 10: requested 2, available 1");
@@ -69,8 +68,6 @@ class OrderServiceTest {
     void cancelOrderRejectsDeliveredOrder() {
         Order order = Order.builder().id(5L).orderNumber("ORD-5").status(OrderStatus.DELIVERED).build();
         when(orderRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(order));
-        OrderService service = service();
-
         assertThatThrownBy(() -> service.cancelOrder(5L))
                 .isInstanceOf(InvalidOrderStatusTransitionException.class);
         verify(productRepository, never()).findAllByIdForUpdate(any());
@@ -81,17 +78,11 @@ class OrderServiceTest {
     void cancelOrderRejectsAlreadyCancelledOrder() {
         Order order = Order.builder().id(5L).orderNumber("ORD-5").status(OrderStatus.CANCELLED).build();
         when(orderRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(order));
-        OrderService service = service();
-
         assertThatThrownBy(() -> service.cancelOrder(5L))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessage("Order ORD-5 is already cancelled");
         verify(productRepository, never()).findAllByIdForUpdate(any());
         verify(orderRepository, never()).save(any());
-    }
-
-    private OrderService service() {
-        return new OrderService(orderRepository, productRepository, customerRepository);
     }
 
     private CreateOrderRequest orderRequest(Long customerId, Long productId, int quantity) {

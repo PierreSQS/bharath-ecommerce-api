@@ -5,9 +5,9 @@ import com.bharath.ecommerce.api.entity.Customer;
 import com.bharath.ecommerce.api.exception.DuplicateResourceException;
 import com.bharath.ecommerce.api.repository.CustomerRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,16 +16,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringJUnitConfig(CustomerService.class)
 class CustomerServiceTest {
-    @Mock
+    @MockitoBean
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private CustomerService service;
 
     @Test
     void registersCustomerWithCanonicalEmail() {
         when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        CustomerService service = new CustomerService(customerRepository);
-
         var response = service.register(RegisterCustomerRequest.builder().firstName(" Ana ").lastName(" Smith ")
                 .email(" Ana.Smith@Example.COM ").phone(" +49 123456 ").build());
 
@@ -37,8 +38,6 @@ class CustomerServiceTest {
     @Test
     void rejectsDuplicateEmail() {
         when(customerRepository.existsByEmailIgnoreCase("ana@example.com")).thenReturn(true);
-        CustomerService service = new CustomerService(customerRepository);
-
         assertThatThrownBy(() -> service.register(RegisterCustomerRequest.builder()
                 .firstName("Ana").lastName("Smith").email(" ANA@example.com ").build()))
                 .isInstanceOf(DuplicateResourceException.class)

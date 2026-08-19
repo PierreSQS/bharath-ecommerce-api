@@ -8,9 +8,9 @@ import com.bharath.ecommerce.api.exception.ResourceNotFoundException;
 import com.bharath.ecommerce.api.repository.CategoryRepository;
 import com.bharath.ecommerce.api.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -22,20 +22,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringJUnitConfig(ProductService.class)
 class ProductServiceTest {
-    @Mock
+    @MockitoBean
     private ProductRepository productRepository;
-    @Mock
+    @MockitoBean
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductService service;
 
     @Test
     void createsProductForExistingCategory() {
         Category category = Category.builder().id(7L).name("Audio").build();
         when(categoryRepository.findById(7L)).thenReturn(Optional.of(category));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        ProductService service = new ProductService(productRepository, categoryRepository);
-
         var response = service.create(CreateProductRequest.builder().name(" Headphones ").sku(" hp-100 ")
                 .price(new BigDecimal("79.99")).stockQuantity(12).categoryId(7L).build());
 
@@ -47,8 +48,6 @@ class ProductServiceTest {
     @Test
     void rejectsDuplicateSku() {
         when(productRepository.existsBySkuIgnoreCase("HP-100")).thenReturn(true);
-        ProductService service = new ProductService(productRepository, categoryRepository);
-
         assertThatThrownBy(() -> service.create(CreateProductRequest.builder().name("Headphones")
                 .sku(" hp-100 ").price(BigDecimal.ONE).stockQuantity(1).categoryId(7L).build()))
                 .isInstanceOf(DuplicateResourceException.class)
@@ -60,8 +59,6 @@ class ProductServiceTest {
     @Test
     void rejectsProductWithUnknownCategory() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
-        ProductService service = new ProductService(productRepository, categoryRepository);
-
         assertThatThrownBy(() -> service.create(CreateProductRequest.builder().name("Headphones").sku("HP-100")
                 .price(BigDecimal.ONE).stockQuantity(1).categoryId(99L).build()))
                 .isInstanceOf(ResourceNotFoundException.class);

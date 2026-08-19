@@ -5,10 +5,10 @@ import com.bharath.ecommerce.api.entity.Category;
 import com.bharath.ecommerce.api.exception.DuplicateResourceException;
 import com.bharath.ecommerce.api.repository.CategoryRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,16 +17,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringJUnitConfig(CategoryService.class)
 class CategoryServiceTest {
-    @Mock
+    @MockitoBean
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private CategoryService service;
 
     @Test
     void createsCategoryAfterNormalizingText() {
         when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        CategoryService service = new CategoryService(categoryRepository);
-
         service.create(CreateCategoryRequest.builder().name("  Home Office ").slug("home-office")
                 .description("  Desks and chairs  ").build());
 
@@ -39,8 +40,6 @@ class CategoryServiceTest {
     @Test
     void rejectsDuplicateCategoryName() {
         when(categoryRepository.existsByNameIgnoreCase("Home Office")).thenReturn(true);
-        CategoryService service = new CategoryService(categoryRepository);
-
         assertThatThrownBy(() -> service.create(CreateCategoryRequest.builder()
                 .name("  Home Office  ").slug("home-office").build()))
                 .isInstanceOf(DuplicateResourceException.class)
@@ -52,8 +51,6 @@ class CategoryServiceTest {
     @Test
     void rejectsDuplicateCategorySlug() {
         when(categoryRepository.existsBySlugIgnoreCase("home-office")).thenReturn(true);
-        CategoryService service = new CategoryService(categoryRepository);
-
         assertThatThrownBy(() -> service.create(CreateCategoryRequest.builder()
                 .name("Home Office").slug("home-office").build()))
                 .isInstanceOf(DuplicateResourceException.class);
