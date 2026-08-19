@@ -9,7 +9,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ProductController.class)
 class ProductControllerMvcTest {
     @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired private JsonMapper jsonMapper;
     @MockitoBean private ProductService productService;
 
     @Test
@@ -56,7 +56,7 @@ class ProductControllerMvcTest {
         // Act
         var result = mockMvc.perform(post("/api/v1/products")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isCreated())
@@ -74,7 +74,7 @@ class ProductControllerMvcTest {
         // Act
         var result = mockMvc.perform(post("/api/v1/products")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isBadRequest());

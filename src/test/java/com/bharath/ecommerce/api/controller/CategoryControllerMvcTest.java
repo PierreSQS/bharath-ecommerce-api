@@ -9,7 +9,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CategoryController.class)
 class CategoryControllerMvcTest {
     @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired private JsonMapper jsonMapper;
     @MockitoBean private CategoryService categoryService;
 
     @Test
@@ -34,7 +34,7 @@ class CategoryControllerMvcTest {
         // Act
         var result = mockMvc.perform(post("/api/v1/categories")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isCreated())
@@ -51,7 +51,7 @@ class CategoryControllerMvcTest {
         // Act
         var result = mockMvc.perform(post("/api/v1/categories")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isBadRequest());

@@ -13,7 +13,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(OrderController.class)
 class OrderControllerMvcTest {
     @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired private JsonMapper jsonMapper;
     @MockitoBean private OrderService orderService;
 
     private OrderResponse order(long id, OrderStatus status) {
@@ -63,7 +63,7 @@ class OrderControllerMvcTest {
         // Act
         var result = mockMvc.perform(post("/api/v1/orders")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isCreated())
@@ -81,7 +81,7 @@ class OrderControllerMvcTest {
         // Act
         var result = mockMvc.perform(post("/api/v1/orders")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isBadRequest());
@@ -120,7 +120,7 @@ class OrderControllerMvcTest {
         // Act
         var result = mockMvc.perform(patch("/api/v1/orders/21/status")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isOk()).andExpect(jsonPath("$.status").value("CONFIRMED"));
@@ -134,7 +134,7 @@ class OrderControllerMvcTest {
         // Act
         var result = mockMvc.perform(patch("/api/v1/orders/21/status")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)));
 
         // Assert
         result.andExpect(status().isBadRequest());
