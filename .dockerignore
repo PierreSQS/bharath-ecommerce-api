@@ -1,0 +1,45 @@
+# Build output
+target/
+build/
+*.class
+
+# Local database volume - live MySQL data, never in a build context
+mysql-files/
+mysql-data/
+mysql-backups/
+
+# Secrets
+.env
+.env.*
+!.env.example
+application-local.*
+application-*.local.*
+
+# VCS & tooling
+.git/
+.gitignore
+.gitattributes
+.github/
+.claude/
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Docs & compose (not needed to build the jar)
+*.md
+compose.yaml
+Dockerfile
+.dockerignore
+
+# Noise
+*.log
+*.tmp
+logs/
+tmp/
+hs_err_pid*
+replay_pid*
+.DS_Store
+Thumbs.db

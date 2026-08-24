@@ -10,3 +10,26 @@ services:
       - '${MYSQL_PORT:-3308}:3306'
     volumes:
       - './mysql-files:/var/lib/mysql'
+    healthcheck:
+      # $$ escapes the $ so Compose passes it to the container shell instead of interpolating from .env.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  app:
+    build:
+      context: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Reached over the compose network on 3306, not the published ${MYSQL_PORT}.
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${MYSQL_DATABASE}'
+      - 'SPRING_DATASOURCE_USERNAME=${MYSQL_USER}'
+      - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
+      - 'SPRING_DOCKER_COMPOSE_ENABLED=false'
+    ports:
+      - '${APP_PORT:-8080}:8080'
+    restart: unless-stopped
