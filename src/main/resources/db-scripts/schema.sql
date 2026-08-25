@@ -87,6 +87,22 @@ CREATE TABLE payments (
     CONSTRAINT fk_payments_order FOREIGN KEY (order_id) REFERENCES orders (id)
 );
 
+-- reviews
+CREATE TABLE reviews (
+    id          BIGINT   NOT NULL AUTO_INCREMENT,
+    product_id  BIGINT   NOT NULL,
+    customer_id BIGINT   NOT NULL,
+    rating      INT      NOT NULL,
+    comment     TEXT,
+    created_at  DATETIME,
+    updated_at  DATETIME,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_reviews_product_customer (product_id, customer_id),
+    CONSTRAINT fk_reviews_product  FOREIGN KEY (product_id)  REFERENCES products  (id),
+    CONSTRAINT fk_reviews_customer FOREIGN KEY (customer_id) REFERENCES customers (id),
+    CONSTRAINT ck_reviews_rating CHECK (rating BETWEEN 1 AND 5)
+);
+
 -- indexes
 CREATE INDEX idx_products_category   ON products    (category_id);
 CREATE INDEX idx_products_active     ON products    (active);
@@ -94,6 +110,7 @@ CREATE INDEX idx_orders_customer     ON orders      (customer_id);
 CREATE INDEX idx_orders_status       ON orders      (status);
 CREATE INDEX idx_order_items_order   ON order_items (order_id);
 CREATE INDEX idx_order_items_product ON order_items (product_id);
+CREATE INDEX idx_reviews_customer    ON reviews     (customer_id);
 
 -- ---------------------------------------------------------------------------
 -- Seed data (reference data + customers only).
@@ -137,3 +154,4 @@ SELECT * FROM customers;
 SELECT * FROM orders;
 SELECT * FROM order_items;
 SELECT * FROM payments;
+SELECT * FROM reviews;

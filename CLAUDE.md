@@ -47,7 +47,8 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 
 ## Database
 - MySQL, database `ecommerce_db`.
-- Flyway owns the runtime schema: `V1__init_schema.sql` creates the `categories`, `products`, `customers`, `orders`, `order_items`, and `payments` tables and their indexes; `V2__populate_db.sql` seeds categories, products, and customers.
+- Flyway owns the runtime schema: `V1__init_schema.sql` creates the `categories`, `products`, `customers`, `orders`, `order_items`, and `payments` tables and their indexes; `V2__populate_db.sql` seeds categories, products, and customers; `V3__add_reviews_table.sql` adds `reviews`.
+- `reviews` enforces one review per customer per product (`uk_reviews_product_customer`) and a 1–5 `rating` (`ck_reviews_rating`). The unique key also indexes `product_id`, so there is no separate `idx_reviews_product`.
 - `spring.jpa.hibernate.ddl-auto=validate` — Hibernate validates entity mappings and does not create or update tables.
 - `src/main/resources/db-scripts/schema.sql` is a standalone reset/setup script; it is not in Flyway's configured `classpath:db/migration` location.
 - Open EntityManager in View is disabled. Hibernate SQL formatting, display, and highlighting are enabled.
