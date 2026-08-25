@@ -54,7 +54,7 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 - Open EntityManager in View is disabled. Hibernate SQL formatting, display, and highlighting are enabled.
 - Docker Compose runs `mysql:9.5`, publishes container port `3306` on `${MYSQL_PORT:-3308}`, and persists data in `./mysql-files`.
 - Compose expects `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_ROOT_PASSWORD`; local values are supplied through the gitignored `.env` file.
-- Spring Boot Docker Compose integration is enabled during tests (`spring.docker.compose.skip.in-tests=false`).
+- Spring Boot Docker Compose integration is skipped during tests by default. Tests that boot the full context must opt in per class: `@SpringBootTest(properties = "spring.docker.compose.skip.in-tests=false")`. Without it the datasource cannot be resolved ("Failed to determine a suitable driver class"). `@WebMvcTest` slices do not need it.
 
 ## Commands
 - Run: `./mvnw spring-boot:run` (Windows: `.\mvnw.cmd spring-boot:run`)
@@ -63,13 +63,13 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 - Start/stop MySQL directly: `docker compose up -d mysql` / `docker compose down`
 - Build the image: `docker build -t ecommerce-api:local .`
 - Run the full stack (MySQL + app): `docker compose up --build -d` / `docker compose down`
-- The current test suite contains one `@SpringBootTest` application-context smoke test.
+- The test suite contains one `@SpringBootTest` application-context smoke test (`EcommerceApiApplicationTests`), which requires Docker to be running; all other tests are `@WebMvcTest` slices or plain Mockito unit tests.
 
 ## Container Image
 - `Dockerfile` is a multi-stage build: `maven:3.9.16-eclipse-temurin-25-alpine` builds the jar, `eclipse-temurin:25-jre-alpine` runs it.
 - The fat jar is split into layers (`-Djarmode=tools ... extract --layers`) and started with `org.springframework.boot.loader.launch.JarLauncher`.
 - Runs as the non-root `spring` user; `HEALTHCHECK` polls `/actuator/health` with BusyBox `wget`.
-- The build stage skips tests — tests start Docker Compose (`spring.docker.compose.skip.in-tests=false`), which cannot work inside a build stage.
+- The build stage skips tests — `EcommerceApiApplicationTests` starts Docker Compose, which cannot work inside a build stage.
 - The app has no `spring.datasource.*` config; outside the compose integration the datasource **must** be injected: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, plus `SPRING_DOCKER_COMPOSE_ENABLED=false`.
 - The `app` service in `compose.yaml` supplies those and waits on the `mysql` healthcheck; it publishes `${APP_PORT:-8080}`.
 - Flyway still migrates at application startup inside the container.
