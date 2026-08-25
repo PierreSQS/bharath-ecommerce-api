@@ -5,6 +5,7 @@ import com.bharath.ecommerce.api.dto.ReviewResponse;
 import com.bharath.ecommerce.api.entity.Customer;
 import com.bharath.ecommerce.api.entity.Product;
 import com.bharath.ecommerce.api.entity.Review;
+import com.bharath.ecommerce.api.exception.BusinessRuleException;
 import com.bharath.ecommerce.api.exception.DuplicateResourceException;
 import com.bharath.ecommerce.api.exception.ResourceNotFoundException;
 import com.bharath.ecommerce.api.repository.CustomerRepository;
@@ -19,6 +20,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
+    private static final int MIN_RATING = 1;
+    private static final int MAX_RATING = 5;
+
     private final ReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
@@ -29,6 +33,12 @@ public class ReviewService {
      */
     @Transactional
     public ReviewResponse create(CreateReviewRequest request) {
+        Integer rating = request.getRating();
+        if (rating == null || rating < MIN_RATING || rating > MAX_RATING) {
+            throw new BusinessRuleException(
+                    "Rating must be between " + MIN_RATING + " and " + MAX_RATING);
+        }
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Product not found with id " + request.getProductId()));

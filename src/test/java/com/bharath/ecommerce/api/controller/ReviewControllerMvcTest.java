@@ -2,6 +2,7 @@ package com.bharath.ecommerce.api.controller;
 
 import com.bharath.ecommerce.api.dto.CreateReviewRequest;
 import com.bharath.ecommerce.api.dto.ReviewResponse;
+import com.bharath.ecommerce.api.exception.BusinessRuleException;
 import com.bharath.ecommerce.api.service.ReviewService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,25 @@ class ReviewControllerMvcTest {
         // Arrange
         var request = CreateReviewRequest.builder().productId(3L).customerId(5L)
                 .rating(6).comment("Out of range").build();
+        when(reviewService.create(any(CreateReviewRequest.class)))
+                .thenThrow(new BusinessRuleException("Rating must be between 1 and 5"));
+
+        // Act
+        var result = mockMvc.perform(post("/api/v1/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonMapper.writeValueAsString(request)));
+
+        // Assert
+        result.andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.status").value(422))
+                .andExpect(jsonPath("$.message").value("Rating must be between 1 and 5"));
+    }
+
+    @Test
+    void should_rejectRequest_when_ratingIsMissing() throws Exception {
+        // Arrange
+        var request = CreateReviewRequest.builder().productId(3L).customerId(5L)
+                .comment("No rating").build();
 
         // Act
         var result = mockMvc.perform(post("/api/v1/reviews")

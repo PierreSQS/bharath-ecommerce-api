@@ -4,6 +4,7 @@ import com.bharath.ecommerce.api.dto.CreateReviewRequest;
 import com.bharath.ecommerce.api.entity.Customer;
 import com.bharath.ecommerce.api.entity.Product;
 import com.bharath.ecommerce.api.entity.Review;
+import com.bharath.ecommerce.api.exception.BusinessRuleException;
 import com.bharath.ecommerce.api.exception.DuplicateResourceException;
 import com.bharath.ecommerce.api.exception.ResourceNotFoundException;
 import com.bharath.ecommerce.api.repository.CustomerRepository;
@@ -49,6 +50,48 @@ class ReviewServiceTest {
         assertThat(response.getComment()).isEqualTo("Excellent mouse");
         assertThat(response.getProductName()).isEqualTo("Wireless Mouse");
         assertThat(response.getCustomerName()).isEqualTo("John Doe");
+    }
+
+    @Test
+    void should_createReview_when_ratingIsAtLowerBound() {
+        when(productRepository.findById(3L)).thenReturn(Optional.of(product()));
+        when(customerRepository.findById(5L)).thenReturn(Optional.of(customer()));
+        when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = service.create(CreateReviewRequest.builder().productId(3L).customerId(5L)
+                .rating(1).build());
+
+        assertThat(response.getRating()).isEqualTo(1);
+    }
+
+    @Test
+    void should_rejectReview_when_ratingIsBelowMinimum() {
+        assertThatThrownBy(() -> service.create(CreateReviewRequest.builder().productId(3L)
+                .customerId(5L).rating(0).build()))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Rating must be between 1 and 5");
+        verify(productRepository, never()).findById(any());
+        verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    void should_rejectReview_when_ratingExceedsMaximum() {
+        assertThatThrownBy(() -> service.create(CreateReviewRequest.builder().productId(3L)
+                .customerId(5L).rating(6).build()))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Rating must be between 1 and 5");
+        verify(productRepository, never()).findById(any());
+        verify(reviewRepository, never()).save(any());
+    }
+
+    @Test
+    void should_rejectReview_when_ratingIsMissing() {
+        assertThatThrownBy(() -> service.create(CreateReviewRequest.builder().productId(3L)
+                .customerId(5L).build()))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Rating must be between 1 and 5");
+        verify(productRepository, never()).findById(any());
+        verify(reviewRepository, never()).save(any());
     }
 
     @Test
