@@ -1,7 +1,5 @@
 package com.bharath.ecommerce.api.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -18,7 +16,8 @@ public class CreateReviewRequest {
     @NotNull @Positive
     private Long customerId;
 
-    @NotNull @Min(1) @Max(5)
+    /** Range is enforced in ReviewService as a business rule, so it applies to every caller. */
+    @NotNull
     private Integer rating;
 
     @Size(max = 2000)

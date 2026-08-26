@@ -2,11 +2,13 @@ package com.bharath.ecommerce.api.controller;
 
 import com.bharath.ecommerce.api.dto.CreateReviewRequest;
 import com.bharath.ecommerce.api.dto.ReviewResponse;
+import com.bharath.ecommerce.api.exception.BusinessRuleException;
 import com.bharath.ecommerce.api.service.ReviewService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -63,6 +65,23 @@ class ReviewControllerRTClientTest {
         // Arrange
         var request = CreateReviewRequest.builder().productId(3L).customerId(5L)
                 .rating(6).comment("Out of range").build();
+        given(reviewService.create(any(CreateReviewRequest.class)))
+                .willThrow(new BusinessRuleException("Rating must be between 1 and 5"));
+
+        // Act
+        var result = restTestClient.post().uri("/api/v1/reviews").body(request).exchange();
+
+        // Assert
+        result.expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT)
+                .expectBody().jsonPath("$.status").isEqualTo(422)
+                .jsonPath("$.message").isEqualTo("Rating must be between 1 and 5");
+    }
+
+    @Test
+    void should_rejectRequest_when_ratingIsMissing() {
+        // Arrange
+        var request = CreateReviewRequest.builder().productId(3L).customerId(5L)
+                .comment("No rating").build();
 
         // Act
         var result = restTestClient.post().uri("/api/v1/reviews").body(request).exchange();
