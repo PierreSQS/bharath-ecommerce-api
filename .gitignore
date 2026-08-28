@@ -88,6 +88,9 @@ logs/
 tmp/
 coverage/
 
+### Playwright files ###
+/.playwright-mcp
+
 ### Operating system files ###
 .DS_Store
 .AppleDouble
