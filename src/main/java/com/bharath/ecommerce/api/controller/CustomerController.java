@@ -23,7 +23,7 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<CustomerResponse> register(@Valid @RequestBody RegisterCustomerRequest request) {
         CustomerResponse response = customerService.register(request);
-        URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/customers/{id}")
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(response.getId()).toUri();
         return ResponseEntity.created(location).body(response);
     }
