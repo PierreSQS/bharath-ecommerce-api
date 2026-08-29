@@ -1,6 +1,7 @@
 # Testing Rules
 - Test class naming: `[Controller Name]MvcTest.java`.
 - Use `@WebMvcTest` for controller tests; mock all dependencies with `@MockitoBean`.
+- If a mocked controller test with RestTestClient is required, name it `<ControllerName>RTClientTest.java`.
 - Use the Jackson 3 ObjectMapper for JSON serialization/deserialization in tests.
 - Use the BDDMockito API in all new tests — `given(...).willReturn(...)` / `willThrow(...)` for stubbing and
   `then(mock).should()` / `should(never())` for verification. Do not use `Mockito.when(...).thenReturn(...)` or
