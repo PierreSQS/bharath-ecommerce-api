@@ -1,6 +1,10 @@
 spring:
   application:
     name: ecommerce-api
+  output:
+    ansi:
+      # Forced instead of DETECT so console colors survive non-TTY streams (e.g. Docker).
+      enabled: always
   jpa:
     hibernate:
       # Schema is owned by Flyway; Hibernate only validates the mapping against it.
