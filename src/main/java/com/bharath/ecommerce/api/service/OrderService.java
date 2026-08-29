@@ -7,6 +7,7 @@ import com.bharath.ecommerce.api.repository.CustomerRepository;
 import com.bharath.ecommerce.api.repository.OrderRepository;
 import com.bharath.ecommerce.api.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +17,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class OrderService {
+    private static final int LOW_STOCK_THRESHOLD = 10;
+
     private static final Map<OrderStatus, Set<OrderStatus>> ALLOWED_TRANSITIONS = Map.of(
             OrderStatus.PENDING, Set.of(OrderStatus.CONFIRMED, OrderStatus.CANCELLED),
             OrderStatus.CONFIRMED, Set.of(OrderStatus.PROCESSING, OrderStatus.CANCELLED),
@@ -59,6 +63,7 @@ public class OrderService {
                     .unitPrice(product.getPrice()).subtotal(subtotal).build());
             total = total.add(subtotal);
         }
+        warnOnLowStock(products.values());
         order.setTotalAmount(total);
         order.setPayment(Payment.builder().paymentMethod(request.getPaymentMethod())
                 .paymentStatus(PaymentStatus.PENDING).amount(total).build());
@@ -139,6 +144,14 @@ public class OrderService {
             if (product.getStockQuantity() < entry.getValue()) {
                 throw new InsufficientStockException("Insufficient stock for product " + product.getId()
                         + ": requested " + entry.getValue() + ", available " + product.getStockQuantity());
+            }
+        }
+    }
+
+    private void warnOnLowStock(Collection<Product> products) {
+        for (Product product : products) {
+            if (product.getStockQuantity() < LOW_STOCK_THRESHOLD) {
+                log.warn("Low stock alert: {} has {} units left", product.getName(), product.getStockQuantity());
             }
         }
     }
