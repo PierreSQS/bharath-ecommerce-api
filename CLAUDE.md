@@ -45,6 +45,11 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 | `DuplicateResourceException` | 409         |
 | `AccessDeniedException`      | 403         |
 
+## API Documentation
+- `springdoc-openapi-starter-webmvc-ui` (3.x, the Spring Boot 4 line) exposes the spec at `/v3/api-docs` and Swagger UI at `/swagger-ui.html`.
+- `config/OpenApiConfig` supplies the `OpenAPI` metadata bean (title, version, Markdown description). It deliberately declares no `servers`, so springdoc derives the server URL from the request and Swagger UI works locally, in Docker, and behind a proxy.
+- Everything else is left on springdoc defaults — controllers, DTOs, and Bean Validation constraints are scanned automatically.
+
 ## Database
 - MySQL, database `ecommerce_db`.
 - Flyway owns the runtime schema: `V1__init_schema.sql` creates the `categories`, `products`, `customers`, `orders`, `order_items`, and `payments` tables and their indexes; `V2__populate_db.sql` seeds categories, products, and customers.
