@@ -62,3 +62,15 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 - Compile check: `./mvnw clean compile` (Windows: `.\mvnw.cmd clean compile`)
 - Start/stop MySQL directly: `docker compose up -d` / `docker compose down`
 - The current test suite contains one `@SpringBootTest` application-context smoke test.
+
+## Commit Messages
+
+Follow Conventional Commits:
+
+- feat: add saved jobs count to navbar
+- fix: correct role guard on employer routes
+- docs: update README with localStorage keys
+- chore: upgrade react-router to v7.8
+- refactor: extract job card into reusable component
+- style: fix spacing on mobile job list
+- build: update or add build scripts or dependencies
