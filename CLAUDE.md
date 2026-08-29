@@ -52,7 +52,8 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 - `src/main/resources/db-scripts/schema.sql` is a standalone reset/setup script; it is not in Flyway's configured `classpath:db/migration` location.
 - Open EntityManager in View is disabled. Hibernate SQL formatting, display, and highlighting are enabled.
 - Docker Compose runs `mysql:9.5`, publishes container port `3306` on `${MYSQL_PORT:-3308}`, and persists data in `./mysql-files`.
-- Compose expects `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_ROOT_PASSWORD`; local values are supplied through the gitignored `.env` file.
+- Compose also builds the `api` service from the root `Dockerfile`, publishes it on `${API_PORT:-8080}`, waits for the MySQL healthcheck (`depends_on: condition: service_healthy`), and disables the Docker Compose integration inside the container (`SPRING_DOCKER_COMPOSE_ENABLED=false`).
+- Compose expects `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_ROOT_PASSWORD`, plus the optional `MYSQL_PORT`/`API_PORT`; local values are supplied through the gitignored `.env` file.
 - Spring Boot Docker Compose integration is enabled during tests (`spring.docker.compose.skip.in-tests=false`).
 
 ## Commands

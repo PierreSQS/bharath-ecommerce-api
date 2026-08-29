@@ -10,3 +10,26 @@ services:
       - '${MYSQL_PORT:-3308}:3306'
     volumes:
       - './mysql-files:/var/lib/mysql'
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # The API talks to MySQL over the compose network on the internal port 3306,
+      # not the published host port.
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/${MYSQL_DATABASE}'
+      - 'SPRING_DATASOURCE_USERNAME=${MYSQL_USER}'
+      - 'SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}'
+      # The app is already running inside compose; it must not start compose itself.
+      - 'SPRING_DOCKER_COMPOSE_ENABLED=false'
+    ports:
+      - '${API_PORT:-8080}:8080'
