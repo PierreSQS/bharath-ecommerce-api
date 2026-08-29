@@ -37,6 +37,7 @@ class ProductServiceTest {
         Category category = Category.builder().id(7L).name("Audio").build();
         when(categoryRepository.findById(7L)).thenReturn(Optional.of(category));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
         var response = service.create(CreateProductRequest.builder().name(" Headphones ").sku(" hp-100 ")
                 .price(new BigDecimal("79.99")).stockQuantity(12).categoryId(7L).build());
 
@@ -48,10 +49,14 @@ class ProductServiceTest {
     @Test
     void rejectsDuplicateSku() {
         when(productRepository.existsBySkuIgnoreCase("HP-100")).thenReturn(true);
-        assertThatThrownBy(() -> service.create(CreateProductRequest.builder().name("Headphones")
-                .sku(" hp-100 ").price(BigDecimal.ONE).stockQuantity(1).categoryId(7L).build()))
+
+        var headphones = CreateProductRequest.builder().name("Headphones")
+                .sku(" hp-100 ").price(BigDecimal.ONE).stockQuantity(1).categoryId(7L).build();
+
+        assertThatThrownBy(() -> service.create(headphones))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessage("Product SKU already exists: HP-100");
+
         verify(categoryRepository, never()).findById(any());
         verify(productRepository, never()).save(any());
     }
@@ -59,8 +64,11 @@ class ProductServiceTest {
     @Test
     void rejectsProductWithUnknownCategory() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> service.create(CreateProductRequest.builder().name("Headphones").sku("HP-100")
-                .price(BigDecimal.ONE).stockQuantity(1).categoryId(99L).build()))
+
+        var headphones = CreateProductRequest.builder().name("Headphones").sku("HP-100")
+                .price(BigDecimal.ONE).stockQuantity(1).categoryId(99L).build();
+
+        assertThatThrownBy(() -> service.create(headphones))
                 .isInstanceOf(ResourceNotFoundException.class);
         verify(productRepository, never()).save(any());
     }

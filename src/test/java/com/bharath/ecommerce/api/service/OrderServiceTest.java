@@ -44,7 +44,8 @@ class OrderServiceTest {
     @Test
     void placeOrderRejectsUnknownCustomer() {
         when(customerRepository.findById(42L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> service.placeOrder(orderRequest(42L, 10L, 2)))
+        var createOrderRequest = orderRequest(42L, 10L, 2);
+        assertThatThrownBy(() -> service.placeOrder(createOrderRequest))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Customer not found with id 42");
         verify(productRepository, never()).findAllByIdForUpdate(any());
@@ -58,7 +59,10 @@ class OrderServiceTest {
                 .price(new BigDecimal("20.00")).build();
         when(customerRepository.findById(42L)).thenReturn(Optional.of(customer));
         when(productRepository.findAllByIdForUpdate(any())).thenReturn(List.of(product));
-        assertThatThrownBy(() -> service.placeOrder(orderRequest(42L, 10L, 2)))
+
+        var createOrderRequest = orderRequest(42L, 10L, 2);
+
+        assertThatThrownBy(() -> service.placeOrder(createOrderRequest))
                 .isInstanceOf(InsufficientStockException.class)
                 .hasMessage("Insufficient stock for product 10: requested 2, available 1");
         verify(orderRepository, never()).save(any());

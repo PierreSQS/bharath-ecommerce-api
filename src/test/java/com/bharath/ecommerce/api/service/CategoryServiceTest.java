@@ -40,10 +40,13 @@ class CategoryServiceTest {
     @Test
     void rejectsDuplicateCategoryName() {
         when(categoryRepository.existsByNameIgnoreCase("Home Office")).thenReturn(true);
-        assertThatThrownBy(() -> service.create(CreateCategoryRequest.builder()
-                .name("  Home Office  ").slug("home-office").build()))
+        var createCategoryRequest = CreateCategoryRequest.builder()
+                .name("  Home Office  ").slug("home-office").build();
+
+        assertThatThrownBy(() -> service.create(createCategoryRequest))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessage("Category name already exists: Home Office");
+
         verify(categoryRepository, never()).existsBySlugIgnoreCase(any());
         verify(categoryRepository, never()).save(any());
     }
@@ -51,9 +54,12 @@ class CategoryServiceTest {
     @Test
     void rejectsDuplicateCategorySlug() {
         when(categoryRepository.existsBySlugIgnoreCase("home-office")).thenReturn(true);
-        assertThatThrownBy(() -> service.create(CreateCategoryRequest.builder()
-                .name("Home Office").slug("home-office").build()))
+        var createCategoryRequest = CreateCategoryRequest.builder()
+                .name("Home Office").slug("home-office").build();
+
+        assertThatThrownBy(() -> service.create(createCategoryRequest))
                 .isInstanceOf(DuplicateResourceException.class);
+
         verify(categoryRepository, never()).save(any());
     }
 }

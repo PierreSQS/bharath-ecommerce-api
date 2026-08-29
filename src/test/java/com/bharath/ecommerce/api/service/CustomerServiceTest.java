@@ -38,8 +38,11 @@ class CustomerServiceTest {
     @Test
     void rejectsDuplicateEmail() {
         when(customerRepository.existsByEmailIgnoreCase("ana@example.com")).thenReturn(true);
-        assertThatThrownBy(() -> service.register(RegisterCustomerRequest.builder()
-                .firstName("Ana").lastName("Smith").email(" ANA@example.com ").build()))
+
+        var registerCustomerRequest = RegisterCustomerRequest.builder()
+                .firstName("Ana").lastName("Smith").email(" ANA@example.com ").build();
+
+        assertThatThrownBy(() -> service.register(registerCustomerRequest))
                 .isInstanceOf(DuplicateResourceException.class)
                 .hasMessage("Customer email already registered: ana@example.com");
         verify(customerRepository, never()).save(any());
