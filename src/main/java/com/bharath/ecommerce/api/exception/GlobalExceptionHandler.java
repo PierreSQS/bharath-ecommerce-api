@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -66,6 +67,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ErrorResponse> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         return response(HttpStatus.BAD_REQUEST, "Malformed request body or unsupported enum value", request, null);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex, HttpServletRequest request) {
+        return response(HttpStatus.NOT_FOUND, "No resource found for " + request.getRequestURI(), request, null);
     }
 
     @ExceptionHandler(Exception.class)
