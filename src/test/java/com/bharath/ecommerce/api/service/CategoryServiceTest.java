@@ -11,11 +11,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.then;
 
 @SpringJUnitConfig(CategoryService.class)
 class CategoryServiceTest {
@@ -26,40 +26,51 @@ class CategoryServiceTest {
     private CategoryService service;
 
     @Test
-    void createsCategoryAfterNormalizingText() {
-        when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        service.create(CreateCategoryRequest.builder().name("  Home Office ").slug("home-office")
-                .description("  Desks and chairs  ").build());
+    void should_normalize_name_and_description_when_creating_category() {
+        // Given
+        given(categoryRepository.save(any(Category.class))).willAnswer(invocation -> invocation.getArgument(0));
+        var createCategoryRequest = CreateCategoryRequest.builder().name("  Home Office ").slug("home-office")
+                .description("  Desks and chairs  ").build();
 
+        // When
+        service.create(createCategoryRequest);
+
+        // Then
         ArgumentCaptor<Category> captor = ArgumentCaptor.forClass(Category.class);
-        verify(categoryRepository).save(captor.capture());
+        then(categoryRepository).should().save(captor.capture());
         assertThat(captor.getValue().getName()).isEqualTo("Home Office");
         assertThat(captor.getValue().getDescription()).isEqualTo("Desks and chairs");
     }
 
     @Test
-    void rejectsDuplicateCategoryName() {
-        when(categoryRepository.existsByNameIgnoreCase("Home Office")).thenReturn(true);
+    void should_throw_duplicate_resource_when_category_name_exists() {
+        // Given
+        given(categoryRepository.existsByNameIgnoreCase("Home Office")).willReturn(true);
         var createCategoryRequest = CreateCategoryRequest.builder()
                 .name("  Home Office  ").slug("home-office").build();
 
-        assertThatThrownBy(() -> service.create(createCategoryRequest))
-                .isInstanceOf(DuplicateResourceException.class)
-                .hasMessage("Category name already exists: Home Office");
+        // When
+        var thrown = catchThrowable(() -> service.create(createCategoryRequest));
 
-        verify(categoryRepository, never()).existsBySlugIgnoreCase(any());
-        verify(categoryRepository, never()).save(any());
+        // Then
+        assertThat(thrown).isInstanceOf(DuplicateResourceException.class)
+                .hasMessage("Category name already exists: Home Office");
+        then(categoryRepository).should(never()).existsBySlugIgnoreCase(any());
+        then(categoryRepository).should(never()).save(any());
     }
 
     @Test
-    void rejectsDuplicateCategorySlug() {
-        when(categoryRepository.existsBySlugIgnoreCase("home-office")).thenReturn(true);
+    void should_throw_duplicate_resource_when_category_slug_exists() {
+        // Given
+        given(categoryRepository.existsBySlugIgnoreCase("home-office")).willReturn(true);
         var createCategoryRequest = CreateCategoryRequest.builder()
                 .name("Home Office").slug("home-office").build();
 
-        assertThatThrownBy(() -> service.create(createCategoryRequest))
-                .isInstanceOf(DuplicateResourceException.class);
+        // When
+        var thrown = catchThrowable(() -> service.create(createCategoryRequest));
 
-        verify(categoryRepository, never()).save(any());
+        // Then
+        assertThat(thrown).isInstanceOf(DuplicateResourceException.class);
+        then(categoryRepository).should(never()).save(any());
     }
 }

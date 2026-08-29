@@ -10,11 +10,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.then;
 
 @SpringJUnitConfig(CustomerService.class)
 class CustomerServiceTest {
@@ -25,26 +25,34 @@ class CustomerServiceTest {
     private CustomerService service;
 
     @Test
-    void registersCustomerWithCanonicalEmail() {
-        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        var response = service.register(RegisterCustomerRequest.builder().firstName(" Ana ").lastName(" Smith ")
-                .email(" Ana.Smith@Example.COM ").phone(" +49 123456 ").build());
+    void should_canonicalize_fields_when_registering_customer() {
+        // Given
+        given(customerRepository.save(any(Customer.class))).willAnswer(invocation -> invocation.getArgument(0));
+        var registerCustomerRequest = RegisterCustomerRequest.builder().firstName(" Ana ").lastName(" Smith ")
+                .email(" Ana.Smith@Example.COM ").phone(" +49 123456 ").build();
 
+        // When
+        var response = service.register(registerCustomerRequest);
+
+        // Then
         assertThat(response.getFirstName()).isEqualTo("Ana");
         assertThat(response.getEmail()).isEqualTo("ana.smith@example.com");
         assertThat(response.getPhone()).isEqualTo("+49 123456");
     }
 
     @Test
-    void rejectsDuplicateEmail() {
-        when(customerRepository.existsByEmailIgnoreCase("ana@example.com")).thenReturn(true);
-
+    void should_throw_duplicate_resource_when_email_already_registered() {
+        // Given
+        given(customerRepository.existsByEmailIgnoreCase("ana@example.com")).willReturn(true);
         var registerCustomerRequest = RegisterCustomerRequest.builder()
                 .firstName("Ana").lastName("Smith").email(" ANA@example.com ").build();
 
-        assertThatThrownBy(() -> service.register(registerCustomerRequest))
-                .isInstanceOf(DuplicateResourceException.class)
+        // When
+        var thrown = catchThrowable(() -> service.register(registerCustomerRequest));
+
+        // Then
+        assertThat(thrown).isInstanceOf(DuplicateResourceException.class)
                 .hasMessage("Customer email already registered: ana@example.com");
-        verify(customerRepository, never()).save(any());
+        then(customerRepository).should(never()).save(any());
     }
 }
