@@ -66,6 +66,8 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 - Test: `./mvnw test` (Windows: `.\mvnw.cmd test`)
 - Compile check: `./mvnw clean compile` (Windows: `.\mvnw.cmd clean compile`)
 - Start/stop MySQL directly: `docker compose up -d` / `docker compose down`
+- Build and run the whole stack (MySQL + API) in Docker: `docker compose up --build` (add `-d` to detach). `--build` is required after any source change, otherwise Compose reuses the previously built `api` image.
+- Build the API image only: `docker compose build api` (or `docker build -t ecommerce-api .`)
 - The current test suite contains one `@SpringBootTest` application-context smoke test.
 
 ## Commit Messages
@@ -79,3 +81,4 @@ Follow Conventional Commits:
 - refactor: extract job card into reusable component
 - style: fix spacing on mobile job list
 - build: update or add build scripts or dependencies
+- 
