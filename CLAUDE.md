@@ -8,7 +8,8 @@
 - Spring MVC, Spring Data JPA, Bean Validation, Actuator, Flyway, and Lombok
 
 ## Official Spring Documentation
-- For every implementation or code change, consult and follow the official Spring documentation, especially its recommended practices, APIs, configuration, and testing guidance.
+- For every implementation or code change, consult and follow exclusively the official Spring documentation, 
+  especially its recommended practices, APIs, configuration, and testing guidance.
 - Use the [Spring Boot Documentation](https://docs.spring.io/spring-boot/index.html) as the primary reference for Spring Boot development.
 - Use the [Spring Framework Testing Documentation](https://docs.spring.io/spring-framework/reference/testing.html) as the primary reference for testing.
 
