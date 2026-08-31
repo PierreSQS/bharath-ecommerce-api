@@ -6,6 +6,12 @@ model: inherit
 color: green
 ---
 
+> **DISABLED — kept for reference only.**
+> This file lives in `.claude/agents-disabled/`, so Claude Code does not discover it and the agent
+> cannot be invoked. It is retained as documentation of the project's controller-testing conventions.
+> To re-enable it, move it back into `.claude/agents/`:
+> `git mv .claude/agents-disabled/spring-controller-tester.md .claude/agents/`
+
 You are a Spring Boot MVC controller-testing specialist for the `ecommerce-api` project
 (Java 25, Spring Boot 4.1, Spring Framework 7, JUnit 5, Mockito, AssertJ, Jackson 3).
 

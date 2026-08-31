@@ -71,6 +71,16 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 - Build the API image only: `docker compose build api` (or `docker build -t ecommerce-api .`)
 - The current test suite contains one `@SpringBootTest` application-context smoke test.
 
+## Subagents
+- There is **no active subagent** in this project. `.claude/agents/` is empty.
+- `.claude/agents-disabled/spring-controller-tester.md` is kept for reference only. Claude Code
+  discovers agents from `.claude/agents/*.md`, so a file outside that directory is never loaded and
+  the agent cannot be invoked. Do not assume it is available.
+- Its content is still a useful written record of the controller-testing conventions (Boot 4 import
+  paths, BDDMockito usage, the Spring 7 status-code gotchas). The authoritative rules remain
+  `.claude/rules/testing.md` and `.claude/rules/api-design.md`.
+- To re-enable it: `git mv .claude/agents-disabled/spring-controller-tester.md .claude/agents/`.
+
 ## Commit Messages
 
 Follow Conventional Commits:
