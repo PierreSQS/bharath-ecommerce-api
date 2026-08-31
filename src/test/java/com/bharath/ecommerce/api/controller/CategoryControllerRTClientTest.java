@@ -4,15 +4,14 @@ import com.bharath.ecommerce.api.dto.CategoryResponse;
 import com.bharath.ecommerce.api.dto.CreateCategoryRequest;
 import com.bharath.ecommerce.api.exception.DuplicateResourceException;
 import com.bharath.ecommerce.api.service.CategoryService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
-import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
@@ -23,6 +22,7 @@ import static org.mockito.BDDMockito.never;
 import static org.mockito.BDDMockito.then;
 
 @WebMvcTest(CategoryController.class)
+@AutoConfigureRestTestClient
 class CategoryControllerRTClientTest {
 
     private static final String CATEGORIES_URI = "/api/v1/categories";
@@ -31,17 +31,10 @@ class CategoryControllerRTClientTest {
     private CategoryService categoryService;
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private RestTestClient restTestClient;
 
     @Autowired
     private JsonMapper jsonMapper;
-
-    private RestTestClient restTestClient;
-
-    @BeforeEach
-    void setUp() {
-        restTestClient = RestTestClient.bindToApplicationContext(webApplicationContext).build();
-    }
 
     @Test
     void should_return_201_with_location_and_body_when_category_is_created() {

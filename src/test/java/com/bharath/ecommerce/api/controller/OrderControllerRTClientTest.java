@@ -15,14 +15,13 @@ import com.bharath.ecommerce.api.exception.InsufficientStockException;
 import com.bharath.ecommerce.api.exception.InvalidOrderStatusTransitionException;
 import com.bharath.ecommerce.api.exception.ResourceNotFoundException;
 import com.bharath.ecommerce.api.service.OrderService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -36,6 +35,7 @@ import static org.mockito.BDDMockito.never;
 import static org.mockito.BDDMockito.then;
 
 @WebMvcTest(OrderController.class)
+@AutoConfigureRestTestClient
 class OrderControllerRTClientTest {
 
     private static final String ORDERS_URI = "/api/v1/orders";
@@ -44,17 +44,10 @@ class OrderControllerRTClientTest {
     private OrderService orderService;
 
     @Autowired
-    private MockMvc mockMvc;
+    private RestTestClient restTestClient;
 
     @Autowired
     private JsonMapper jsonMapper;
-
-    private RestTestClient client;
-
-    @BeforeEach
-    void setUp() {
-        client = RestTestClient.bindTo(mockMvc).build();
-    }
 
     @Test
     void should_return_200_with_all_orders_when_orders_are_listed() {
@@ -64,7 +57,7 @@ class OrderControllerRTClientTest {
                 orderResponse(2L, "ORD-0002", OrderStatus.SHIPPED)));
 
         // When
-        var response = client.get().uri(ORDERS_URI).exchange();
+        var response = restTestClient.get().uri(ORDERS_URI).exchange();
 
         // Then
         response.expectStatus().isOk()
@@ -86,7 +79,7 @@ class OrderControllerRTClientTest {
                 .willReturn(orderResponse(5L, "ORD-0005", OrderStatus.PENDING));
 
         // When
-        var response = client.post().uri(ORDERS_URI)
+        var response = restTestClient.post().uri(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(validRequest()))
                 .exchange();
@@ -113,7 +106,7 @@ class OrderControllerRTClientTest {
                 .paymentMethod(null).items(List.of()).build();
 
         // When
-        var response = client.post().uri(ORDERS_URI)
+        var response = restTestClient.post().uri(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(request))
                 .exchange();
@@ -140,7 +133,7 @@ class OrderControllerRTClientTest {
                 .items(List.of(OrderItemRequest.builder().productId(0L).quantity(-2).build())).build();
 
         // When
-        var response = client.post().uri(ORDERS_URI)
+        var response = restTestClient.post().uri(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(request))
                 .exchange();
@@ -164,7 +157,7 @@ class OrderControllerRTClientTest {
                 """;
 
         // When
-        var response = client.post().uri(ORDERS_URI)
+        var response = restTestClient.post().uri(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(body)
                 .exchange();
@@ -186,7 +179,7 @@ class OrderControllerRTClientTest {
                 .willThrow(new BusinessRuleException("Product 3 is not available for ordering"));
 
         // When
-        var response = client.post().uri(ORDERS_URI)
+        var response = restTestClient.post().uri(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(validRequest()))
                 .exchange();
@@ -208,7 +201,7 @@ class OrderControllerRTClientTest {
                 .willThrow(new ResourceNotFoundException("Product not found with id 3"));
 
         // When
-        var response = client.post().uri(ORDERS_URI)
+        var response = restTestClient.post().uri(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(validRequest()))
                 .exchange();
@@ -230,7 +223,7 @@ class OrderControllerRTClientTest {
                 .willThrow(new InsufficientStockException("Insufficient stock for product 3"));
 
         // When
-        var response = client.post().uri(ORDERS_URI)
+        var response = restTestClient.post().uri(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(validRequest()))
                 .exchange();
@@ -251,7 +244,7 @@ class OrderControllerRTClientTest {
         given(orderService.getOrder(5L)).willReturn(orderResponse(5L, "ORD-0005", OrderStatus.CONFIRMED));
 
         // When
-        var response = client.get().uri(ORDERS_URI + "/{id}", 5L).exchange();
+        var response = restTestClient.get().uri(ORDERS_URI + "/{id}", 5L).exchange();
 
         // Then
         response.expectStatus().isOk()
@@ -270,7 +263,7 @@ class OrderControllerRTClientTest {
         given(orderService.getOrder(404L)).willThrow(new ResourceNotFoundException("Order not found with id 404"));
 
         // When
-        var response = client.get().uri(ORDERS_URI + "/{id}", 404L).exchange();
+        var response = restTestClient.get().uri(ORDERS_URI + "/{id}", 404L).exchange();
 
         // Then
         response.expectStatus().isNotFound()
@@ -289,7 +282,7 @@ class OrderControllerRTClientTest {
                 .willReturn(orderResponse(5L, "ORD-0005", OrderStatus.PENDING));
 
         // When
-        var response = client.get().uri(ORDERS_URI + "/number/{orderNumber}", "ORD-0005").exchange();
+        var response = restTestClient.get().uri(ORDERS_URI + "/number/{orderNumber}", "ORD-0005").exchange();
 
         // Then
         response.expectStatus().isOk()
@@ -308,7 +301,7 @@ class OrderControllerRTClientTest {
                 .willThrow(new ResourceNotFoundException("Order not found with number ORD-9999"));
 
         // When
-        var response = client.get().uri(ORDERS_URI + "/number/{orderNumber}", "ORD-9999").exchange();
+        var response = restTestClient.get().uri(ORDERS_URI + "/number/{orderNumber}", "ORD-9999").exchange();
 
         // Then
         response.expectStatus().isNotFound()
@@ -327,7 +320,7 @@ class OrderControllerRTClientTest {
                 .willReturn(orderResponse(5L, "ORD-0005", OrderStatus.CONFIRMED));
 
         // When
-        var response = client.patch().uri(ORDERS_URI + "/{id}/status", 5L)
+        var response = restTestClient.patch().uri(ORDERS_URI + "/{id}/status", 5L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(request))
                 .exchange();
@@ -347,7 +340,7 @@ class OrderControllerRTClientTest {
         var request = UpdateOrderStatusRequest.builder().status(null).build();
 
         // When
-        var response = client.patch().uri(ORDERS_URI + "/{id}/status", 5L)
+        var response = restTestClient.patch().uri(ORDERS_URI + "/{id}/status", 5L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(request))
                 .exchange();
@@ -370,7 +363,7 @@ class OrderControllerRTClientTest {
                 .willThrow(new InvalidOrderStatusTransitionException(OrderStatus.PENDING, OrderStatus.DELIVERED));
 
         // When
-        var response = client.patch().uri(ORDERS_URI + "/{id}/status", 5L)
+        var response = restTestClient.patch().uri(ORDERS_URI + "/{id}/status", 5L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(request))
                 .exchange();
@@ -393,7 +386,7 @@ class OrderControllerRTClientTest {
                 .willThrow(new ResourceNotFoundException("Order not found with id 404"));
 
         // When
-        var response = client.patch().uri(ORDERS_URI + "/{id}/status", 404L)
+        var response = restTestClient.patch().uri(ORDERS_URI + "/{id}/status", 404L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonMapper.writeValueAsString(request))
                 .exchange();
@@ -413,7 +406,7 @@ class OrderControllerRTClientTest {
         given(orderService.cancelOrder(5L)).willReturn(orderResponse(5L, "ORD-0005", OrderStatus.CANCELLED));
 
         // When
-        var response = client.post().uri(ORDERS_URI + "/{id}/cancel", 5L).exchange();
+        var response = restTestClient.post().uri(ORDERS_URI + "/{id}/cancel", 5L).exchange();
 
         // Then
         response.expectStatus().isOk()
@@ -431,7 +424,7 @@ class OrderControllerRTClientTest {
                 .willThrow(new DuplicateResourceException("Order ORD-0005 is already cancelled"));
 
         // When
-        var response = client.post().uri(ORDERS_URI + "/{id}/cancel", 5L).exchange();
+        var response = restTestClient.post().uri(ORDERS_URI + "/{id}/cancel", 5L).exchange();
 
         // Then
         response.expectStatus().isEqualTo(HttpStatus.CONFLICT)
@@ -449,7 +442,7 @@ class OrderControllerRTClientTest {
         given(orderService.cancelOrder(404L)).willThrow(new ResourceNotFoundException("Order not found with id 404"));
 
         // When
-        var response = client.post().uri(ORDERS_URI + "/{id}/cancel", 404L).exchange();
+        var response = restTestClient.post().uri(ORDERS_URI + "/{id}/cancel", 404L).exchange();
 
         // Then
         response.expectStatus().isNotFound()
