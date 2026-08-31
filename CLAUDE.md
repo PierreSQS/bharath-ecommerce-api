@@ -72,7 +72,11 @@ All handled in `GlobalExceptionHandler`, returning `ErrorResponse` JSON:
 - The current test suite contains one `@SpringBootTest` application-context smoke test.
 
 ## Subagents
-- There is **no active subagent** in this project. `.claude/agents/` is empty.
+- `.claude/agents/resttestclient-controller-test-writer.md` is the only active subagent. It writes
+  `RestTestClient` controller tests (`<ControllerName>RTClientTest.java`) for one or more controllers
+  and verifies them by running only the classes it created. It never writes the MockMvc variant and
+  never touches `src/main/`. For several controllers, launch one instance per controller in parallel
+  in a single message.
 - `.claude/agents-disabled/spring-controller-tester.md` is kept for reference only. Claude Code
   discovers agents from `.claude/agents/*.md`, so a file outside that directory is never loaded and
   the agent cannot be invoked. Do not assume it is available.
