@@ -35,6 +35,7 @@ import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -157,7 +158,8 @@ class OrderControllerMvcTest {
         // When
         var result = mockMvc.perform(post(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body));
+                .content(body))
+                .andDo(print());
 
         // Then
         result.andExpect(status().isBadRequest())
@@ -177,7 +179,8 @@ class OrderControllerMvcTest {
         // When
         var result = mockMvc.perform(post(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(validRequest())));
+                .content(jsonMapper.writeValueAsString(validRequest())))
+                .andDo(print());
 
         // Then
         result.andExpect(status().isUnprocessableContent())
@@ -217,7 +220,8 @@ class OrderControllerMvcTest {
         // When
         var result = mockMvc.perform(post(ORDERS_URI)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(validRequest())));
+                .content(jsonMapper.writeValueAsString(validRequest())))
+                .andDo(print());
 
         // Then
         result.andExpect(status().isConflict())
@@ -326,7 +330,8 @@ class OrderControllerMvcTest {
         // When
         var result = mockMvc.perform(patch(ORDERS_URI + "/{id}/status", 5L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)))
+                .andDo(print());
 
         // Then
         result.andExpect(status().isBadRequest())
@@ -347,7 +352,8 @@ class OrderControllerMvcTest {
         // When
         var result = mockMvc.perform(patch(ORDERS_URI + "/{id}/status", 5L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMapper.writeValueAsString(request)));
+                .content(jsonMapper.writeValueAsString(request)))
+                .andDo(print());
 
         // Then
         result.andExpect(status().isConflict())
