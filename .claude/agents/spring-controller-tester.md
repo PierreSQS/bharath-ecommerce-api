@@ -90,8 +90,28 @@ use the fluent chain end to end: `.get()/.post()`, `.uri(...)`, `.contentType(..
 
 ## Step 3 — Run and fix
 
-- Run only the classes you touched, never the whole suite:
-  `./mvnw.cmd test -Dtest=<TestClassName>` (bash shell on Windows; use forward slashes in paths).
+- Run only the classes you touched or were asked to run, never the whole suite
+  (bash shell on Windows; use forward slashes in paths).
+- **One invocation, classes in parallel.** Never start a separate `mvnw` run per class — pass every
+  class to a single `-Dtest` list and let JUnit run the classes concurrently:
+
+  ```bash
+  ./mvnw.cmd test -Dtest='<ClassA>,<ClassB>,<ClassC>' \
+    -Djunit.jupiter.execution.parallel.enabled=true \
+    -Djunit.jupiter.execution.parallel.mode.default=same_thread \
+    -Djunit.jupiter.execution.parallel.mode.classes.default=concurrent \
+    -Djunit.jupiter.execution.parallel.config.strategy=fixed \
+    -Djunit.jupiter.execution.parallel.config.fixed.parallelism=4
+  ```
+
+  Set `fixed.parallelism` to the number of test classes in the run, capped at 4.
+  Keep the flags on the command line — do not add them to `pom.xml` or create a
+  `junit-platform.properties`; the parallel mode is this agent's execution mode, not the project's.
+- `mode.default=same_thread` is mandatory: test *classes* run concurrently, but the methods inside a
+  class stay on one thread. Methods of the same class share the `@MockitoBean` stubs and the MockMvc
+  instance, so running them concurrently would make stubbing and `then(mock).should()` verification
+  race. Never set `mode.default=concurrent`.
+- A single class in the run needs no parallel flags — plain `./mvnw.cmd test -Dtest=<TestClassName>`.
 - On failure, read the detail from `target/surefire-reports/<FQCN>.txt` and the counts from
   `target/surefire-reports/TEST-<FQCN>.xml`.
 - Before trusting a stack trace, check its line numbers against the current source — stale failing
